@@ -1,0 +1,215 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OS Travel & Tours Chatbot</title>
+  <style>
+    /* Floating Button */
+    .chatbot-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #0078ff;
+      color: white;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      cursor: pointer;
+      box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+
+    /* Chatbox */
+    .chatbot-container {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      width: 320px;
+      height: 420px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0px 4px 20px rgba(0,0,0,0.2);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      z-index: 1000;
+    }
+
+    .chatbot-header {
+      background: #0078ff;
+      color: white;
+      padding: 12px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .chatbot-messages {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      font-size: 14px;
+    }
+
+    .chatbot-input {
+      display: flex;
+      border-top: 1px solid #ddd;
+    }
+
+    .chatbot-input input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .chatbot-input button {
+      padding: 10px 15px;
+      border: none;
+      background: #0078ff;
+      color: white;
+      cursor: pointer;
+    }
+
+    .bot-message, .user-message {
+      margin: 6px 0;
+      padding: 8px 12px;
+      border-radius: 8px;
+      max-width: 80%;
+      clear: both;
+    }
+
+    .bot-message {
+      background: #f1f1f1;
+      float: left;
+    }
+
+    .user-message {
+      background: #0078ff;
+      color: white;
+      float: right;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Button -->
+  <div class="chatbot-button" onclick="toggleChat()">💬</div>
+
+  <!-- Chatbox -->
+  <div class="chatbot-container" id="chatbot">
+    <div class="chatbot-header">OS Travel & Tours</div>
+    <div class="chatbot-messages" id="messages">
+      <div class="bot-message">👋 Hello! I’m your travel assistant. Ask me about visas, ticketing, or packages.</div>
+    </div>
+    <div class="chatbot-input">
+      <input type="text" id="userInput" placeholder="Type a message..."/>
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const API_KEY = "AIzaSyCduUjLNhVTo8QVBO6Dz5kpi7oFk99shX4"; // replace with your Gemini API key
+
+    // Contact info (will be returned when user asks for address/phone)
+    const contactInfo = `Located in: Alay Plaza
+Address: Office # 3, Aaly Plaza, Fazal-e-Haq Road, Block E G 6/2 Blue Area, Islamabad, 44000
+Phone: (051) 2120701`;
+
+    // Simple FAQ database
+    const faq = {
+      "visa cost": "💳 UAE visit visa costs around PKR 35,000 (30 days).",
+      "uae visa": "💳 UAE visit visa costs around PKR 35,000 (30 days).",
+      "ticket price": "✈️ Ticket prices vary depending on the destination. For Dubai, it starts from PKR 90,000.",
+      "contact": "📞 You can call us at (051) 2120701."
+    };
+
+    function toggleChat() {
+      const chat = document.getElementById("chatbot");
+      chat.style.display = chat.style.display === "flex" ? "none" : "flex";
+    }
+
+    function addMessage(text, sender) {
+      const messages = document.getElementById("messages");
+      const div = document.createElement("div");
+      div.className = sender === "bot" ? "bot-message" : "user-message";
+      div.innerText = text;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById("userInput");
+      const original = input.value.trim();
+      const msg = original.toLowerCase();
+      if (!msg) return;
+
+      addMessage(original, "user");
+      input.value = "";
+
+      // Direct contact/address/phone detection (high priority)
+      if (/\b(address|location|located|phone|phone number|contact|office)\b/.test(msg)) {
+        addMessage(contactInfo, "bot");
+        return;
+      }
+
+      // Identity / "who do you work for" detection
+      if (/\b(who (do )?you work for|who are you|who (am|r) i talking to|who is this)\b/.test(msg)) {
+        addMessage("I  work for OS Travel & Tours.", "bot");
+        return;
+      }
+
+      // FAQ shortcut
+      for (let key in faq) {
+        if (msg.includes(key)) {
+          addMessage(faq[key], "bot");
+          return;
+        }
+      }
+
+      // Otherwise call Gemini
+      addMessage("...", "bot");
+
+      try {
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{
+                parts: [{
+                  text: `You are OS Travel & Tours Assistant. 
+                  Always answer clearly about visas, flights, and travel packages.
+                  If the question is not related, politely redirect to call us at (051) 2120701.
+                  User asked: ${msg}`
+                }]
+              }]
+            })
+          }
+        );
+      
+
+        const data = await res.json();
+        const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I didn’t get that.";
+
+        // Replace "..." with AI reply
+        const messages = document.getElementById("messages");
+        messages.lastChild.innerText = reply;
+
+      } catch (error) {
+        console.error(error);
+        const messages = document.getElementById("messages");
+        messages.lastChild.innerText ="⚠️ Our System is busy at the moment Thankyou for your patiance  or contact us at    If the question is not related, politely redirect to call us at (051) 2120701. ";
+      }
+    }
+  </script>
+</body>
+</html>
