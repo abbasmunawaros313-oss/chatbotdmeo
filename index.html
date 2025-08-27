@@ -137,41 +137,113 @@ Phone: 051-2120700-701,0333-5542877`;
         docs:["Passport (6+ months)","4 Photos (35x50)","Online form","Bank statement","Visa request letter","Return ticket","Hotel","Insurance","Visa support number"],
         src:"/visa/kazakhstan/"
       },
+      France: {
+  type: "Schengen Visa (Short-stay up to 90 days)",
+  price: "€90 (short stay) — €100 (long stay, not handled)",
+  processing: "Typically 25 days; may extend up to 45 days",
+  docs: [
+    "Passport (6+ months validity + old passports + 2 blank pages)",
+    "Photo (35×45 mm, recent, head ~70–80%)",
+    "Bank statement (last 6 months with bank letterhead & signature)",
+    "— Self-employed: company bank statements, tax returns, business registration, Chamber certificate, proof of ownership",
+    "— Employed: last 3 salary slips, employment ID, income tax returns",
+    "— Family cases: FRC, MRC, invitation or sponsor letter"
+  ],
+  src: "/schengen-visa-file-processing/france-visa/"
+},
+"Germany": {
+  type: "Schengen Visa (Short-stay up to 90 days)",
+  price: "€90 (tourist visa)",
+  processing: "15–25 days",
+  documents: [
+    "Passport (valid + old passports)",
+    "Passport copy",
+    "Photo (35×45 mm, head 70–80%)",
+    "Bank statement (last 6 months, with bank stamp & sign)",
+    "— Self-employed: business bank statements, tax returns, business docs",
+    "— Employed: salary slips, tax docs, company ID"
+  ],
+  src: "/schengen-visa-file-processing/germany-visa/"
+},
+"UK": {
+  type: "UK Visit Visa (Tourist)",
+  price: "£127 (up to 6 months), £475 (2 years), £848 (5 years), £1,059 (10 years)",
+  processing: "21 days (may extend up to 50 days)",
+  documents: [
+    "Passport (plus old passports)",
+    "Bank statements (6 months, bank letterhead & stamp)",
+    "— Self-employed: business docs, tax returns, ownership",
+    "— Employed: salary slips, tax docs, company ID",
+    "— Additional: FRC, MRC, invitation/sponsor letter if applicable"
+  ],
+  src: "/schengen-visa-file-processing/united-kingdom-uk-visa/"
+},
+"Spain": {
+  type: "Schengen Visa (Short-stay up to 90 days)",
+  price: "Contact for latest fees",
+  processing: "Contact for latest timings",
+  documents: [
+    "Passport (valid + old passports, 2 blank pages)",
+    "Photo (35×45 mm, recent, 70–80% head)",
+    "Bank statement (last 6 months, with bank seal & signature)",
+    "— Self-employed: business docs & financials",
+    "— Employed: salary slips & employment docs"
+  ],
+  src: "/schengen-visa-file-processing/spain-visa/"
+},
+"Italy": {
+  type: "Schengen Visa (Short-stay up to 90 days)",
+  price: "€90 (tourist visa)",
+  processing: "15–25 days",
+  documents: [
+    "Passport (valid details page copy)",
+    "Photo (35×45 mm, head 70–80%)",
+    "Visa application form (filled & signed)",
+    "Bank statement (6 months, with bank seal)",
+    "— Self-employed: business documents & financials",
+    "— Employed: salary slips, company docs",
+    "— Additional: invitation or sponsor letter if needed",
+    "— Police clearance if required"
+  ],
+  src: "/schengen-visa-file-processing/italy-visa/"
+},
+"Greece": {
+  type: "Schengen Visa (Short-stay up to 90 days)",
+  price: "Contact for latest fees",
+  processing: "Contact for latest timings",
+  documents: [
+    "Passport (valid)",
+    "Photo (35×45 mm, head 70–80%)",
+    "Visa application form",
+    "Bank statement (6 months, with bank seal)",
+    "— Self-employed/employed additional docs per type",
+  ],
+  src: "/schengen-visa-file-processing/greece-visa/"
+},
+"USA": {
+  type: "USA Visit / B1-B2 Visa",
+  price: "$185 (tourist/business), $185 (transit), $185 (student), $205 (workers/trainees)",
+  processing: "3–5 days (may vary)",
+  documents: [
+    "Passport plus old passports",
+    "Photos (600×600 to 1200×1200 px, head 50–70%)",
+    "Bank statements (6 months, bank letterhead & sign)",
+    "— Self-employed: business docs, tax returns",
+    "— Employed: salary slips, tax docs, company ID",
+    "— Plus: FRC, MRC, invitation/sponsor letter if applicable"
+  ],
+  src: "/schengen-visa-file-processing/united-states-usa-visa/"
+},
+
+
+
+
+
       "Egypt": { type:"eVisa / Embassy", price:"20000 /Pkr ", processing:"   4- 6 Weeks  Working Days { Varies Case to Case }", stay:"varies", docs:["Passport","Photo","Itinerary"], src:"/visa/" },
       "Turkey": { type:"eVisa / Embassy", price:"    55,000 /Pkr ", processing:" 15 to 18  Working Days", stay:"varies", docs:["Passport","Photo"], src:"/visa/" },
 
-      // Schengen / File Processing group
-      "France": fileItem(),
-      "Spain": fileItem(),
-      "United Kingdom (UK)": fileItem(),
-      "United States (USA)": fileItem(),
-      "Australia": fileItem(),
-      "Canada": fileItem(),
-      "Belgium": fileItem(),
-      "Netherlands": fileItem(),
-      "Poland": fileItem(),
-      "Germany": fileItem(),
-      "Italy": fileItem(),
-      "Hungary": fileItem(),
-      "Greece": fileItem(),
-      "Czech Republic": fileItem(),
-      "Switzerland": fileItem(),
-      "Portugal": fileItem(),
-      "Denmark": fileItem(),
-      "Sweden": fileItem(),
-      "Norway": fileItem()
+     
     };
-
-    function fileItem(){
-      return {
-        type:"Visa File Processing (Embassy)",
-        price:"Embassy fee varies – contact for latest",
-        processing:"Typically 2–4+ weeks (varies by embassy/time of year)",
-        stay:"as per visa category",
-        docs:["Application form","Passport","Photos","Financials","Travel itinerary","Cover/Invitation (if any)"],
-        src:"/schengen-visa-file-processing/"
-      }
-    }
 
     // ===================== UI / Boot =====================
     let currentCountry = null;
