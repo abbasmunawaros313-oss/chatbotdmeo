@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,7 +20,7 @@
       justify-content: center;
       font-size: 28px;
       cursor: pointer;
-      box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 8px rgba(0,0,0,.2);
       z-index: 1000;
     }
 
@@ -30,64 +29,71 @@
       position: fixed;
       bottom: 90px;
       right: 20px;
-      width: 320px;
-      height: 420px;
+      width: 360px;
+      height: 520px;
       background: #fff;
-      border-radius: 12px;
-      box-shadow: 0px 4px 20px rgba(0,0,0,0.2);
+      border-radius: 14px;
+      box-shadow: 0 8px 28px rgba(0,0,0,.22);
       display: none;
       flex-direction: column;
       overflow: hidden;
-      font-family: Arial, sans-serif;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Arial, sans-serif;
       z-index: 1000;
     }
 
     .chatbot-header {
-      background: #0078ff;
+      background: linear-gradient(135deg, #0078ff, #0056cc);
       color: white;
       padding: 12px;
-      font-weight: bold;
+      font-weight: 700;
       text-align: center;
+      font-size: 16px;
     }
 
     .chatbot-messages {
       flex: 1;
-      padding: 10px;
+      padding: 12px;
       overflow-y: auto;
       font-size: 14px;
+      background: #f9fbff;
     }
 
     .chatbot-input {
       display: flex;
-      border-top: 1px solid #ddd;
+      border-top: 1px solid #e6ecf5;
+      background: #fff;
     }
 
     .chatbot-input input {
       flex: 1;
-      padding: 10px;
+      padding: 12px;
       border: none;
       outline: none;
       font-size: 14px;
     }
 
     .chatbot-input button {
-      padding: 10px 15px;
+      padding: 10px 14px;
       border: none;
       background: #0078ff;
       color: white;
       cursor: pointer;
+      font-weight: 600;
     }
 
     .bot-message, .user-message {
       margin: 6px 0;
-      padding: 8px 12px;
-      border-radius: 8px;
-      max-width: 80%;
+      padding: 9px 12px;
+      border-radius: 10px;
+      max-width: 85%;
       clear: both;
+      line-height: 1.35;
+      white-space: pre-wrap;
     }
 
     .bot-message {
-      background: #f1f1f1;
+      background: #eef5ff;
+      color: #0b2a5a;
       float: left;
     }
 
@@ -96,44 +102,214 @@
       color: white;
       float: right;
     }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 8px 0 2px;
+    }
+
+    .chip {
+      background: #ffffff;
+      border: 1px solid #d9e6ff;
+      color: #0b2a5a;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all .15s ease;
+    }
+    .chip:hover { background: #eef5ff; }
+
+    .muted { opacity: .85; font-size: 12px; }
+    .small { font-size: 12px; }
+
+    .divider {
+      height: 1px;
+      background: #e6ecf5;
+      margin: 10px 0;
+    }
   </style>
 </head>
 <body>
 
   <!-- Floating Button -->
-  <div class="chatbot-button" onclick="toggleChat()">💬</div>
+  <div class="chatbot-button" onclick="toggleChat()" title="Chat with OS Travel & Tours">💬</div>
 
   <!-- Chatbox -->
   <div class="chatbot-container" id="chatbot">
-    <div class="chatbot-header">OS Travel & Tours</div>
+    <div class="chatbot-header">OS Travel & Tours — Visa & Tickets</div>
     <div class="chatbot-messages" id="messages">
-      <div class="bot-message">👋 Hello! I’m your travel assistant. Ask me about visas, ticketing, or packages.</div>
+      <div class="bot-message">
+        👋 Hi! I’m your OS Travel Assistant. Ask me about visas (fees, documents, processing), tickets, hotel bookings, insurance, or visa file processing (Schengen/UK/USA/Australia/Canada).
+        <div class="chips" id="quickChips"></div>
+        <div class="muted">Tip: try “Singapore visa price”, “Azerbaijan documents”, “Do you do Schengen?”</div>
+      </div>
     </div>
     <div class="chatbot-input">
-      <input type="text" id="userInput" placeholder="Type a message..."/>
+      <input type="text" id="userInput" placeholder="Type a message…"/>
       <button onclick="sendMessage()">Send</button>
     </div>
   </div>
 
   <script>
-    const API_KEY = "AIzaSyCduUjLNhVTo8QVBO6Dz5kpi7oFk99shX4"; // replace with your Gemini API key
+    /**********************
+     * CONFIG
+     **********************/
+    const API_KEY = "AIzaSyCduUjLNhVTo8QVBO6Dz5kpi7oFk99shX4"; // ← replace with your Gemini API key
 
-    // Contact info (will be returned when user asks for address/phone)
-    const contactInfo = `Located in: Alay Plaza
-Address: Office # 3, Aaly Plaza, Fazal-e-Haq Road, Block E G 6/2 Blue Area, Islamabad, 44000
-Phone: (051) 2120701`;
+    // Contact info (from your site)
+    const contactInfo = `📍 Office # 3, Aaly Plaza, Fazal-e-Haq Rd, Block E G 6/2, Blue Area, Islamabad
+📞 (051) 2120700–701, 0333-5542877
+✉️ info@ostravels.com, ostravelsisb@gmail.com`;
 
-    // Simple FAQ database
-    const faq = {
-      "visa cost": "💳 UAE visit visa costs around PKR 35,000 (30 days).",
-      "uae visa": "💳 UAE visit visa costs around PKR 35,000 (30 days).",
-      "ticket price": "✈️ Ticket prices vary depending on the destination. For Dubai, it starts from PKR 90,000.",
-      "contact": "📞 You can call us at (051) 2120701."
+    /**********************
+     * DATA harvested from ost ravels .com (visa pages)
+     * Sources (for your reference):
+     * - Azerbaijan: https://ostravels.com/visa/azerbaijan-visa/
+     * - Uzbekistan: https://ostravels.com/visa/uzbekistan-visa/
+     * - Singapore:  https://ostravels.com/visa/singapore-visa/
+     * - Kyrgyzstan: https://ostravels.com/visa/kyrgyzstan-visa/
+     * - Kazakhstan: https://ostravels.com/visa/kazakhstan/
+     * - Visa list:  https://ostravels.com/visa/
+     * - Contact:    https://ostravels.com/contact-2/
+     **********************/
+
+    // Countries OS Travel deals in (Visa menu)
+    const countriesServed = [
+      "Malaysia","Singapore","Hong Kong","Indonesia","Thailand","Egypt","Cambodia","Azerbaijan",
+      "Tajikistan","Uzbekistan","China","Turkey","Kyrgyzstan","Sri Lanka","Vietnam","Nepal",
+      "Philippines","Saudi Arabia","Kazakhstan"
+    ];
+
+    // Visa file processing (embassy) countries
+    const visaFileCountries = [
+      "France","Spain","United Kingdom","United States","Australia","Canada","Belgium","Netherlands",
+      "Poland","Germany","Italy","Hungary","Greece","Czech Republic","Switzerland","Portugal","Denmark",
+      "Sweden","Norway"
+    ];
+
+    // Per-country structured facts (fees in site currency; “prices subject to change” line will be added)
+    const visas = {
+      "Azerbaijan": {
+        fee: "PKR 8,000 (sticker) • eVisa USD 50",
+        validity: "1 month (sticker) • eVisa 35 days",
+        category: "Single entry",
+        stay: "Up to 30 days",
+        processing: "Sticker 10–15 working days • eVisa 3–5 working days",
+        evisa: "Available for Pakistani citizens (single entry)",
+        docs: [
+          "Passport (6+ months validity)",
+          "4 photos (35×50mm, white background)",
+          "CNIC copy",
+          "Last 6 months bank statement",
+          "Bank maintenance letter",
+          "Visa request letter",
+          "Invitation/Telex from Azerbaijan",
+          "NTN (if applicable)",
+          "Return ticket"
+        ],
+        source: "Azerbaijan"
+      },
+      "Uzbekistan": {
+        fee: "USD 85 (embassy fee only; telex & service charges extra)",
+        validity: "1 month",
+        category: "Single entry",
+        stay: "As per request",
+        processing: "12–15 working days",
+        evisa: "Not available yet for Pakistani passport (apply via embassy)",
+        docs: [
+          "Passport (6+ months validity)",
+          "4 photos (35×50mm, white background)",
+          "Last 6 months bank statement",
+          "Bank maintenance letter",
+          "NTN",
+          "Visa request letter",
+          "CNIC copy",
+          "Return ticket",
+          "Visa form (filled)",
+          "Telex from Uzbekistan (we can arrange)"
+        ],
+        source: "Uzbekistan"
+      },
+      "Singapore": {
+        fee: "PKR 18,000",
+        validity: "1 month (35 days for eVisa)",
+        category: "Single entry",
+        stay: "Up to 1 month",
+        processing: "7–10 working days (consulate) • 10–15 working days (eVisa; case dependent)",
+        evisa: "Yes — apply via ICA-authorized agent (OS Travel has ID)",
+        docs: [
+          "Passport (6+ months validity)",
+          "4 photos (35×50mm, white background) or 1 photo for eVisa",
+          "CNIC copy",
+          "Last 6 months bank statement",
+          "Bank maintenance letter",
+          "Visa request letter",
+          "Invitation letter (citizen/company) for consulate route",
+          "NTN / tax returns (if applicable)",
+          "Employer letter & last 3 salary slips (if employed)",
+          "Return ticket"
+        ],
+        source: "Singapore"
+      },
+      "Kyrgyzstan": {
+        fee: "USD 250 (eVisa)",
+        validity: "Varies",
+        category: "Single entry (commonly)",
+        stay: "Varies",
+        processing: "Varies (apply online or embassy)",
+        evisa: "Available — invitation letter typically required",
+        docs: [
+          "Completed visa form",
+          "Passport (6+ months validity)",
+          "Photo (passport size; white background)",
+          "Flight & hotel bookings",
+          "Proof of funds",
+          "Invitation letter (if applicable)",
+          "Visa fee receipt"
+        ],
+        source: "Kyrgyzstan"
+      },
+      "Kazakhstan": {
+        fee: "USD 60 (consulate)",
+        validity: "30 days",
+        category: "Single entry",
+        stay: "30 days",
+        processing: "3–5 working days",
+        evisa: "Not available for Pakistani citizens",
+        docs: [
+          "Passport (6+ months validity)",
+          "4 photos (35×50mm, white background)",
+          "Online visa application",
+          "6-month bank statement",
+          "Visa request letter",
+          "Hotel booking",
+          "Return air ticket",
+          "Travel insurance",
+          "Visa support number (MIA Kazakhstan)"
+        ],
+        source: "Kazakhstan"
+      }
     };
 
+    // Services offered
+    const services = [
+      "Visa Services (eVisa + Embassy/File Processing)",
+      "Air Ticketing",
+      "Hotel Booking",
+      "Travel Insurance",
+      "Visa File Preparation (Schengen, UK, USA, Australia, Canada, etc.)"
+    ];
+
+    /**********************
+     * UI helpers
+     **********************/
     function toggleChat() {
       const chat = document.getElementById("chatbot");
       chat.style.display = chat.style.display === "flex" ? "none" : "flex";
+      if (chat.style.display === "flex") renderChips();
     }
 
     function addMessage(text, sender) {
@@ -143,39 +319,181 @@ Phone: (051) 2120701`;
       div.innerText = text;
       messages.appendChild(div);
       messages.scrollTop = messages.scrollHeight;
+      return div; // return node (for replacing "..." with AI response)
     }
 
+    function renderChips() {
+      const chipNames = ["Which countries do you handle?", "Singapore visa price", "Azerbaijan documents", "Uzbekistan processing time", "Kyrgyzstan e-visa", "Schengen file process"];
+      const quick = document.getElementById("quickChips");
+      quick.innerHTML = "";
+      chipNames.forEach(label => {
+        const btn = document.createElement("button");
+        btn.className = "chip";
+        btn.textContent = label;
+        btn.onclick = () => {
+          document.getElementById("userInput").value = label;
+          sendMessage();
+        };
+        quick.appendChild(btn);
+      });
+    }
+
+    /**********************
+     * NLP-ish helpers
+     **********************/
+    const norm = s => s.normalize("NFKC").toLowerCase().trim();
+
+    function bestCountryMatch(text) {
+      const t = norm(text);
+      const all = [...Object.keys(visas), ...countriesServed, ...visaFileCountries];
+      let best = null, score = 0;
+      all.forEach(c => {
+        const n = c.toLowerCase();
+        if (t.includes(n)) { // simple contains
+          if (n.length > score) { score = n.length; best = c; }
+        }
+      });
+      return best;
+    }
+
+    function isContactIntent(t) {
+      return /\b(address|location|located|phone|phone number|contact|office|email|whatsapp)\b/i.test(t);
+    }
+
+    function isIdentityIntent(t) {
+      return /\b(who (do )?you work for|who are you|who (am|r) i talking to|who is this)\b/i.test(t);
+    }
+
+    function isCountryListIntent(t) {
+      return /\b(which countries|what countries|countries you (deal|handle)|do you do (visas|visa) for|visa list)\b/i.test(t);
+    }
+
+    function isPriceIntent(t) {
+      return /\b(price|fee|cost|charges?)\b/i.test(t);
+    }
+
+    function isDocsIntent(t) {
+      return /\b(documents?|docs?|requirements?|needed|need to apply|paperwork)\b/i.test(t);
+    }
+
+    function isTimeIntent(t) {
+      return /\b(process(ing)? time|how long|days|duration|timeline)\b/i.test(t);
+    }
+
+    function isEvisaIntent(t) {
+      return /\bev-?visa|online visa|apply online\b/i.test(t);
+    }
+
+    function isServicesIntent(t) {
+      return /\b(services|what do you offer|tickets?|insurance|hotels?)\b/i.test(t);
+    }
+
+    /**********************
+     * Response formatters
+     **********************/
+    function formatCountryCard(country) {
+      const v = visas[country];
+      if (!v) {
+        // countries we handle but no detailed card yet
+        return `🌍 We handle ${country} visas. For fees & latest requirements, please call us:\n${contactInfo}`;
+      }
+
+      const parts = [
+        `🛂 ${country} Visa`,
+        v.fee ? `• Fee: ${v.fee}` : "",
+        v.validity ? `• Visa validity: ${v.validity}` : "",
+        v.category ? `• Category: ${v.category}` : "",
+        v.stay ? `• Allowed stay: ${v.stay}` : "",
+        v.processing ? `• Processing time: ${v.processing}` : "",
+        v.evisa ? `• e-Visa: ${v.evisa}` : "",
+        v.docs && v.docs.length ? `\n📄 Documents:\n- ${v.docs.join("\n- ")}` : ""
+      ].filter(Boolean).join("\n");
+
+      return parts + `\n\nⓘ Prices/timelines can change; confirm with our team.\n${contactInfo}`;
+    }
+
+    function listCountries() {
+      return `🌐 Countries we handle (visas):\n` +
+        `• ${countriesServed.join(", ")}\n\n` +
+        `📁 Visa file processing (embassy support):\n` +
+        `• ${visaFileCountries.join(", ")}\n\n` +
+        `Need a country not listed? Ask me!`;
+    }
+
+    function listServices() {
+      return `🧭 Our services:\n- ${services.join("\n- ")}\n\n${contactInfo}`;
+    }
+
+    /**********************
+     * Chat flow
+     **********************/
     async function sendMessage() {
       const input = document.getElementById("userInput");
       const original = input.value.trim();
-      const msg = original.toLowerCase();
+      const msg = norm(original);
       if (!msg) return;
 
       addMessage(original, "user");
       input.value = "";
 
-      // Direct contact/address/phone detection (high priority)
-      if (/\b(address|location|located|phone|phone number|contact|office)\b/.test(msg)) {
+      // High-priority routing
+      if (isContactIntent(original)) {
         addMessage(contactInfo, "bot");
         return;
       }
 
-      // Identity / "who do you work for" detection
-      if (/\b(who (do )?you work for|who are you|who (am|r) i talking to|who is this)\b/.test(msg)) {
-        addMessage("I  work for OS Travel & Tours.", "bot");
+      if (isIdentityIntent(original)) {
+        addMessage("🤖 I’m the official OS Travel & Tours assistant.", "bot");
         return;
       }
 
-      // FAQ shortcut
-      for (let key in faq) {
-        if (msg.includes(key)) {
-          addMessage(faq[key], "bot");
-          return;
-        }
+      if (isCountryListIntent(original)) {
+        addMessage(listCountries(), "bot");
+        return;
       }
 
-      // Otherwise call Gemini
-      addMessage("...", "bot");
+      if (isServicesIntent(original)) {
+        addMessage(listServices(), "bot");
+        return;
+      }
+
+      // Country-specific intents
+      const country = bestCountryMatch(original);
+      if (country) {
+        // If the user asked generally (“documents/price/time/eVisa”), tailor the snippet
+        if (isDocsIntent(original) || isPriceIntent(original) || isTimeIntent(original) || isEvisaIntent(original)) {
+          addMessage(formatCountryCard(country), "bot");
+          return;
+        }
+        // Otherwise give the full card
+        addMessage(formatCountryCard(country), "bot");
+        return;
+      }
+
+      // Generic FAQs
+      if (/\b(ticket|flight|air ?ticket(ing)?)\b/i.test(original)) {
+        addMessage("✈️ We book domestic & international flights at competitive rates. Share your route & dates, or call us:\n" + contactInfo, "bot");
+        return;
+      }
+      if (/\b(hotel|booking)\b/i.test(original)) {
+        addMessage("🏨 Yes — we arrange hotel bookings tailored to your trip & budget.", "bot");
+        return;
+      }
+      if (/\b(insurance)\b/i.test(original)) {
+        addMessage("🛡️ We provide travel insurance options for Schengen and global trips.", "bot");
+        return;
+      }
+      if (/\b(umrah|saudi)\b/i.test(original)) {
+        addMessage("🕋 We offer Umrah support and Saudi visit visa assistance. Message your preferred dates.", "bot");
+        return;
+      }
+      if (/\b(schengen|uk|usa|australia|canada)\b/i.test(original)) {
+        addMessage("📁 We prepare visa files for Schengen, UK, USA, Australia, Canada — docs, appointments & guidance. Ask for a country to see requirements.", "bot");
+        return;
+      }
+
+      // Otherwise call Gemini fallback (kept within travel scope)
+      const placeholder = addMessage("...", "bot");
 
       try {
         const res = await fetch(
@@ -186,31 +504,40 @@ Phone: (051) 2120701`;
             body: JSON.stringify({
               contents: [{
                 parts: [{
-                  text: `You are OS Travel & Tours Assistant. 
-                  Always answer clearly about visas, flights, and travel packages.
-                  If the question is  related, politely redirect to call us at (051) 2120701.
-                  User asked: ${msg}`
-                }]
-              }]
+                  text:
+`ROLE: You are the official assistant for OS Travel & Tours (Islamabad).
+SCOPE: Only answer about visas, tickets, travel packages, hotel booking, travel insurance, and visa file processing.
+BRAND DATA (authoritative):
+- Contact: ${contactInfo}
+- Services: ${services.join(", ")}
+- Countries: ${countriesServed.join(", ")}
+- Visa File Countries: ${visaFileCountries.join(", ")}
+- Country facts (fees/processing/docs): ${JSON.stringify(visas)}
+
+POLICY:
+- If asked for a country we handle, answer with fee, validity, category, stay, processing, e-visa note, and bullet documents.
+- If asked for countries, show both lists.
+- If user asks unrelated things, politely redirect to call.
+- Always add: "Prices/timelines can change; please confirm with our team."
+
+User: ${original}`
+                }]}
+              ]
             })
           }
         );
-      
 
         const data = await res.json();
-        const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I didn’t get that.";
+        const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text
+          || `🙏 Sorry, I couldn’t get that. Please call us:\n${contactInfo}`;
 
-        // Replace "..." with AI reply
-        const messages = document.getElementById("messages");
-        messages.lastChild.innerText = reply;
+        placeholder.innerText = reply;
 
-      } catch (error) {
-        console.error(error);
-        const messages = document.getElementById("messages");
-        messages.lastChild.innerText ="⚠️ Our System is busy at the moment Thankyou for your patiance  or contact us at    If the question is not related, politely redirect to call us at (051) 2120701. ";
+      } catch (err) {
+        console.error(err);
+        placeholder.innerText = `⚠️ Our system is busy. Please try again or call us:\n${contactInfo}`;
       }
     }
   </script>
 </body>
 </html>
-
